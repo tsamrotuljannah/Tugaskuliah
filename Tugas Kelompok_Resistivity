@@ -1,0 +1,108 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 20, 4);
+
+// sensor arus ACS712 30A
+// 5A ==> sensitivitasnya = 185 mV/A = 0.185 V/A
+// 20A ==> sensitivitasnya = 100 mV/A = 0.1 V/A
+// 5A ==> sensitivitasnya = 66 mV/A = 0.66 V/A
+const int pin_analog = A0;  // menghubungkan keluaran sensor ke pin A0 Arduino
+float sensitivitas = 0.185;  // ini aturan V/A
+float adcvalue = 0;
+float tegangan_offset = 2.5;
+float tegangan = 0.0;
+float A = 0.0314;
+float l = 0.912; 
+
+int relay = 2;
+int button = 4;
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(button, INPUT);
+  pinMode(relay, OUTPUT);
+
+  lcd.begin();
+  lcd.backlight();
+
+  lcd.setCursor(1,1);
+  lcd.print("RESISTIVITY =======");
+  lcd.setCursor(1,2);
+  lcd.print("=========== METER");
+  delay(2000);
+  
+  lcd.clear();
+
+  lcd.setCursor(2,0);
+  lcd.print("Group 9 IGL ");
+  lcd.setCursor(2,1);
+  lcd.print("Tsamrotul Jannah");
+  lcd.setCursor(2,2);
+  lcd.print("Radhina Zahra");
+  lcd.setCursor(2,3);
+  lcd.print("Cut Latansa");
+  delay(5000);
+
+  lcd.clear();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //button = digitalRead(4);
+
+    //if (button == HIGH){
+    digitalWrite(relay,HIGH);
+    delay(1000);
+
+    adcvalue = analogRead(pin_analog);  //membaca nilai sensor dari analog
+    tegangan = (adcvalue*5.0)/1023.0;   // V
+    float arus = abs(((tegangan-tegangan_offset)/sensitivitas)); //Rumus Menghitung Arus
+    float nilai_sensor = analogRead(A1);
+    float voltage = abs((adcvalue*5.0)/1023.0);   // V
+    float resistansi = abs(tegangan / arus);
+    float resistivitas = abs((resistansi*A)/l);
+
+    lcd.clear();
+    delay(500);
+
+    lcd.setCursor(0,0);
+    lcd.print("ADC Value= ");
+    lcd.setCursor(12,0);
+    lcd.print(adcvalue);
+
+    lcd.setCursor(0,1);
+    lcd.print("Voltage= ");
+    lcd.setCursor(11, 1);
+    lcd.print(voltage),3;
+    lcd.setCursor(17,1);
+    lcd.print(" V");
+
+    lcd.setCursor(0,2);
+    lcd.print("Current= ");
+    lcd.setCursor(11, 2);
+    lcd.print(arus,3);    // menampilkan nilai arus dengan 3 desimal setelah titik
+    lcd.setCursor(16,2);
+    lcd.print("A");
+
+    lcd.setCursor(0,3);
+    lcd.print("Resist= ");
+    lcd.setCursor(8,3);
+    lcd.print(resistivitas,4);
+    lcd.setCursor(14,3);
+    lcd.print("ohm.m");
+
+    digitalWrite(relay,LOW);
+    delay(1000);     
+
+    //delay(1000);
+   // lcd.clear();
+  //}else if (button == LOW){
+    //digitalWrite(relay,LOW);
+
+    //lcd.clear();
+    //lcd.setCursor(2,1);
+    //lcd.print("BUTTON OFF");
+    //delay(1000);
+   //}
+}
